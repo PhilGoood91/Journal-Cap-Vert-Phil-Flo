@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cap-Vert Journal — Auteur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean: #0c4a6e;
+    --ocean-light: #155e85;
+    --sand: #f5e6c8;
+    --sand-dark: #e8d5a8;
+    --terra: #c2410c;
+    --terra-light: #ea580c;
+    --green: #166534;
+    --green-light: #16a34a;
+    --sky: #e0f2fe;
+    --white: #fefef9;
+    --text: #1c1917;
+    --text-light: #78716c;
+    --shadow: 0 4px 24px rgba(12, 74, 110, 0.12);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: linear-gradient(165deg, var(--ocean) 0%, var(--ocean-light) 35%, var(--sand) 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding-bottom: 100px;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--ocean);
+    color: var(--sand);
+    padding: 20px 16px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 2px;
+  }
+  .header .subtitle {
+    font-size: 0.82rem;
+    font-weight: 300;
+    opacity: 0.8;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Container ── */
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* ── Sélecteur de jour ── */
+  .jour-selector {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .jour-selector label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--ocean);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .jour-selector select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--sand-dark);
+    border-radius: 10px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1rem;
+    background: var(--white);
+    color: var(--text);
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230c4a6e' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  .jour-info {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: var(--sky);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: var(--ocean);
+    line-height: 1.4;
+  }
+  .jour-info .prevu-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+  .jour-info .prevu-text { font-weight: 300; font-size: 0.82rem; }
+  .jour-editable {
+    margin-top: 10px;
+  }
+  .jour-editable label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.78rem;
+    color: var(--ocean);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    margin-top: 10px;
+  }
+  .jour-editable label:first-child { margin-top: 0; }
+  .jour-editable input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid var(--sand-dark);
+    border-radius: 10px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.95rem;
+    background: var(--white);
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+  .jour-editable input:focus {
+    outline: none;
+    border-color: var(--ocean);
+  }
+  .jour-editable .hint {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  /* ── Carte section ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ocean);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon { font-size: 1.3rem; }
+
+  /* ── Champs texte ── */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid var(--sand-dark);
+    border-radius: 10px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    background: var(--white);
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--ocean);
+  }
+  .field textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  /* ── Zone upload ── */
+  .upload-zone {
+    border: 2px dashed var(--sand-dark);
+    border-radius: 14px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: linear-gradient(135deg, var(--sky) 0%, var(--white) 100%);
+    margin-bottom: 14px;
+  }
+  .upload-zone:active, .upload-zone.dragover {
+    border-color: var(--ocean);
+    background: var(--sky);
+    transform: scale(0.98);
+  }
+  .upload-zone .icon-upload { font-size: 2.4rem; margin-bottom: 8px; }
+  .upload-zone p { font-size: 0.92rem; color: var(--text-light); }
+  .upload-zone .formats { font-size: 0.75rem; color: var(--text-light); margin-top: 4px; opacity: 0.7; }
+  .upload-zone input { display: none; }
+
+  /* ── Aperçu des fichiers ── */
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .preview-item {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: var(--sand);
+  }
+  .preview-item img, .preview-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .preview-item .remove-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .preview-item .file-type {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .preview-item .legende-mini {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.5);
+    padding: 4px 6px;
+  }
+  .preview-item .legende-mini input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 0.72rem;
+    font-family: 'Source Sans 3', sans-serif;
+    outline: none;
+  }
+  .preview-item .legende-mini input::placeholder { color: rgba(255,255,255,0.7); }
+
+  /* ── Boutons ── */
+  .btn-publier {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.03em;
+  }
+  .btn-publier.primary {
+    background: linear-gradient(135deg, var(--terra) 0%, var(--terra-light) 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(194, 65, 12, 0.35);
+  }
+  .btn-publier.primary:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(194, 65, 12, 0.25);
+  }
+  .btn-publier:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* ── Statut ── */
+  .status-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 16px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.9rem;
+    z-index: 200;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .status-bar.visible { transform: translateY(0); }
+  .status-bar.ok { background: var(--green); color: white; }
+  .status-bar.err { background: var(--terra); color: white; }
+  .status-bar.loading { background: var(--ocean); color: white; }
+
+  /* ── Progression upload ── */
+  .progress-container {
+    margin-bottom: 14px;
+    display: none;
+  }
+  .progress-container.visible { display: block; }
+  .progress-label {
+    font-size: 0.82rem;
+    color: var(--ocean);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 8px;
+    background: var(--sand);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ocean), var(--green-light));
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  /* ── Compteur fichiers ── */
+  .file-count {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  /* ── Brouillon sauvegardé ── */
+  .draft-notice {
+    font-size: 0.75rem;
+    color: var(--green);
+    text-align: center;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .draft-notice.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏝️ Cap-Vert Journal</h1>
+  <div class="subtitle">Carnet de voyage — Mai 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- Sélecteur de jour -->
+  <div class="jour-selector">
+    <label>Quel jour sommes-nous ?</label>
+    <select id="jourSelect"></select>
+    <div class="jour-info" id="jourInfo">
+      <div class="prevu-label">📋 Programme prévu</div>
+      <div class="prevu-text" id="jourPrevu"></div>
+    </div>
+    <div class="jour-editable">
+      <label>📍 Où es-tu vraiment ?</label>
+      <input type="text" id="lieuActuel" placeholder="Ex : Tarrafal, Santiago">
+      <div class="hint">Modifiable — le programme est une suggestion, pas une obligation !</div>
+    </div>
+  </div>
+
+  <!-- Bloc Texte -->
+  <div class="card">
+    <div class="card-title"><span class="icon">✍️</span> Raconte ta journée</div>
+    <div class="field">
+      <label>Titre du jour</label>
+      <input type="text" id="titre" placeholder="Ex : Premiers pas à Praia...">
+    </div>
+    <div class="field">
+      <label>Ton récit</label>
+      <textarea id="texte" placeholder="Qu'as-tu vu, ressenti, goûté aujourd'hui ?"></textarea>
+    </div>
+    <div class="draft-notice" id="draftNotice">💾 Brouillon sauvegardé</div>
+  </div>
+
+  <!-- Bloc Médias -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📸</span> Photos & Vidéos</div>
+
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="icon-upload">📷</div>
+      <p>Appuie ici pour ajouter</p>
+      <div class="formats">JPG, PNG, MP4 — max 50 Mo par fichier</div>
+      <input type="file" id="fileInput" multiple accept="image/*,video/*">
+    </div>
+
+    <div class="file-count" id="fileCount"></div>
+    <div class="preview-grid" id="previewGrid"></div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-label" id="progressLabel">Upload en cours...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+
+  <!-- Bouton publier -->
+  <button class="btn-publier primary" id="btnPublier" onclick="publier()">
+    🚀 Publier cette journée
+  </button>
+
+</div>
+
+<div class="status-bar" id="statusBar"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ⚠️ REMPLACER PAR VOTRE URL APPS SCRIPT /exec
+// ═══════════════════════════════════════════════════════════════
+const WEBHOOK_URL = "COLLER_VOTRE_URL_APPS_SCRIPT_ICI";
+
+// ── Itinéraire ─────────────────────────────────────────────────
+const ITINERAIRE = [
+  { jour: 1,  date: "07/05", lieu: "Praia, Santiago",              resume: "Arrivée à Santiago – Hôtel Praia" },
+  { jour: 2,  date: "08/05", lieu: "Praia, Santiago",              resume: "Balade quartier Plato – Festival de Gamboa" },
+  { jour: 3,  date: "09/05", lieu: "Praia / Cidade Velha",         resume: "Marché Sucupira – Cidade Velha – Citadelle" },
+  { jour: 4,  date: "10/05", lieu: "Tarrafal, Santiago",           resume: "Bus vers Tarrafal – Camp de Chão Bom" },
+  { jour: 5,  date: "11/05", lieu: "Tarrafal, Santiago",           resume: "Village Ribeirão d'Espinho Branco" },
+  { jour: 6,  date: "12/05", lieu: "Tarrafal, Santiago",           resume: "Randonnée Serra de Malagueta" },
+  { jour: 7,  date: "13/05", lieu: "Assomada, Santiago",           resume: "Mercado Assomada – Grottes Águas Belas" },
+  { jour: 8,  date: "14/05", lieu: "Praia, Santiago",              resume: "Village Boa Entrada – Retour Praia" },
+  { jour: 9,  date: "15/05", lieu: "Mindelo, São Vicente",         resume: "Vol Praia→Mindelo – Musée Cesária Évora" },
+  { jour: 10, date: "16/05", lieu: "Mindelo, São Vicente",         resume: "Visite Mindelo – Plage – Café musique" },
+  { jour: 11, date: "17/05", lieu: "Mindelo, São Vicente",         resume: "Rando Calhau – Vulcão Viana" },
+  { jour: 12, date: "18/05", lieu: "Ponta do Sol, Santo Antão",    resume: "Bateau Mindelo→Porto Novo → Ponta do Sol" },
+  { jour: 13, date: "19/05", lieu: "Corvo, Santo Antão",           resume: "Randonnée Ponta do Sol → Corvo" },
+  { jour: 14, date: "20/05", lieu: "Ponta do Sol, Santo Antão",    resume: "Randonnée Corvo → Ponta do Sol" },
+  { jour: 15, date: "21/05", lieu: "Ribeira Grande, Santo Antão",  resume: "Randonnée Cova → Paul" },
+  { jour: 16, date: "22/05", lieu: "Ribeira Grande, Santo Antão",  resume: "Randonnée Corda → Coculi" },
+  { jour: 17, date: "23/05", lieu: "Mindelo, São Vicente",         resume: "Retour bateau – Café musique" },
+  { jour: 18, date: "24/05", lieu: "Mindelo, São Vicente",         resume: "Baía das Gatas – Plage – Café musique" },
+  { jour: 19, date: "25/05", lieu: "Mindelo, São Vicente",         resume: "Rando Farol Dona Amélia – Plage – Café musique" },
+  { jour: 20, date: "26/05", lieu: "Vol retour",                   resume: "Vol São Vicente → Paris" }
+];
+
+// ── State ──────────────────────────────────────────────────────
+let fichiers = []; // { file, preview, legende }
+let enCours = false;
+
+// ── Init ───────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('jourSelect');
+  ITINERAIRE.forEach(j => {
+    const opt = document.createElement('option');
+    opt.value = j.jour;
+    opt.textContent = `J${j.jour} — ${j.date} — ${j.lieu}`;
+    sel.appendChild(opt);
+  });
+
+  // Sélectionner le jour courant automatiquement
+  const today = new Date();
+  const startDate = new Date(2026, 4, 7); // 7 mai 2026
+  const diffDays = Math.floor((today - startDate) / 86400000) + 1;
+  if (diffDays >= 1 && diffDays <= 20) {
+    sel.value = diffDays;
+  }
+
+  updateJourInfo();
+  sel.addEventListener('change', updateJourInfo);
+
+  // Restaurer brouillon
+  restaurerBrouillon();
+
+  // Auto-save brouillon
+  document.getElementById('titre').addEventListener('input', sauverBrouillon);
+  document.getElementById('texte').addEventListener('input', sauverBrouillon);
+  document.getElementById('lieuActuel').addEventListener('input', sauverBrouillon);
+
+  // File input
+  document.getElementById('fileInput').addEventListener('change', handleFiles);
+});
+
+function updateJourInfo() {
+  const j = ITINERAIRE[document.getElementById('jourSelect').value - 1];
+  document.getElementById('jourPrevu').textContent = '📍 ' + j.lieu + ' — ' + j.resume;
+  // Pré-remplir le lieu avec la suggestion, mais éditable
+  const lieuInput = document.getElementById('lieuActuel');
+  // Ne pré-remplir que si le champ est vide ou si on change de jour
+  lieuInput.placeholder = j.lieu;
+  restaurerBrouillon();
+  // Si pas de brouillon restauré pour le lieu, proposer le lieu prévu
+  if (!lieuInput.value) {
+    lieuInput.value = j.lieu;
+  }
+}
+
+// ── Gestion des fichiers ───────────────────────────────────────
+function handleFiles(e) {
+  const newFiles = Array.from(e.target.files);
+  const MAX_SIZE = 50 * 1024 * 1024; // 50 Mo
+
+  for (const file of newFiles) {
+    if (file.size > MAX_SIZE) {
+      afficherStatut(`⚠️ ${file.name} trop volumineux (max 50 Mo)`, 'err');
+      continue;
+    }
+    const preview = URL.createObjectURL(file);
+    fichiers.push({ file, preview, legende: '' });
+  }
+
+  renderPreviews();
+  e.target.value = '';
+}
+
+function renderPreviews() {
+  const grid = document.getElementById('previewGrid');
+  const count = document.getElementById('fileCount');
+  grid.innerHTML = '';
+
+  if (fichiers.length === 0) {
+    count.textContent = '';
+    return;
+  }
+
+  count.textContent = `${fichiers.length} fichier${fichiers.length > 1 ? 's' : ''} sélectionné${fichiers.length > 1 ? 's' : ''}`;
+
+  fichiers.forEach((f, i) => {
+    const item = document.createElement('div');
+    item.className = 'preview-item';
+
+    const isVideo = f.file.type.startsWith('video');
+
+    if (isVideo) {
+      const vid = document.createElement('video');
+      vid.src = f.preview;
+      vid.muted = true;
+      item.appendChild(vid);
+    } else {
+      const img = document.createElement('img');
+      img.src = f.preview;
+      img.alt = f.file.name;
+      item.appendChild(img);
+    }
+
+    // Badge type
+    const badge = document.createElement('span');
+    badge.className = 'file-type';
+    badge.textContent = isVideo ? '🎬 Vidéo' : '📷';
+    item.appendChild(badge);
+
+    // Bouton supprimer
+    const btn = document.createElement('button');
+    btn.className = 'remove-btn';
+    btn.innerHTML = '✕';
+    btn.onclick = (e) => { e.stopPropagation(); retirerFichier(i); };
+    item.appendChild(btn);
+
+    // Mini champ légende
+    const leg = document.createElement('div');
+    leg.className = 'legende-mini';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = 'Légende…';
+    inp.value = f.legende;
+    inp.onclick = (e) => e.stopPropagation();
+    inp.oninput = (e) => { fichiers[i].legende = e.target.value; };
+    leg.appendChild(inp);
+    item.appendChild(leg);
+
+    grid.appendChild(item);
+  });
+}
+
+function retirerFichier(index) {
+  URL.revokeObjectURL(fichiers[index].preview);
+  fichiers.splice(index, 1);
+  renderPreviews();
+}
+
+// ── Brouillon local ────────────────────────────────────────────
+function sauverBrouillon() {
+  const jour = document.getElementById('jourSelect').value;
+  const data = {
+    titre: document.getElementById('titre').value,
+    texte: document.getElementById('texte').value,
+    lieu: document.getElementById('lieuActuel').value
+  };
+  try {
+    localStorage.setItem('cvj_brouillon_' + jour, JSON.stringify(data));
+    const notice = document.getElementById('draftNotice');
+    notice.classList.add('visible');
+    setTimeout(() => notice.classList.remove('visible'), 2000);
+  } catch(e) {}
+}
+
+function restaurerBrouillon() {
+  const jour = document.getElementById('jourSelect').value;
+  try {
+    const saved = localStorage.getItem('cvj_brouillon_' + jour);
+    if (saved) {
+      const data = JSON.parse(saved);
+      document.getElementById('titre').value = data.titre || '';
+      document.getElementById('texte').value = data.texte || '';
+      if (data.lieu) document.getElementById('lieuActuel').value = data.lieu;
+    } else {
+      document.getElementById('titre').value = '';
+      document.getElementById('texte').value = '';
+      // Le lieu sera rempli par updateJourInfo
+      document.getElementById('lieuActuel').value = '';
+    }
+  } catch(e) {
+    document.getElementById('titre').value = '';
+    document.getElementById('texte').value = '';
+    document.getElementById('lieuActuel').value = '';
+  }
+}
+
+// ── Publication ────────────────────────────────────────────────
+async function publier() {
+  if (enCours) return;
+
+  const jour = parseInt(document.getElementById('jourSelect').value);
+  const titre = document.getElementById('titre').value.trim();
+  const texte = document.getElementById('texte').value.trim();
+  const lieuActuel = document.getElementById('lieuActuel').value.trim() || ITINERAIRE[jour - 1]?.lieu || '';
+
+  if (!titre && !texte && fichiers.length === 0) {
+    afficherStatut('⚠️ Rien à publier — ajoute du texte ou des photos !', 'err');
+    return;
+  }
+
+  enCours = true;
+  const btn = document.getElementById('btnPublier');
+  btn.disabled = true;
+  btn.textContent = '⏳ Publication en cours...';
+
+  const progress = document.getElementById('progressContainer');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+
+  try {
+    const totalSteps = fichiers.length + 1;
+    let currentStep = 0;
+
+    // 1. Uploader chaque fichier
+    if (fichiers.length > 0) {
+      progress.classList.add('visible');
+
+      for (let i = 0; i < fichiers.length; i++) {
+        progressLabel.textContent = `Upload ${i + 1}/${fichiers.length} : ${fichiers[i].file.name}`;
+        progressFill.style.width = ((i / totalSteps) * 100) + '%';
+
+        const base64 = await fileToBase64(fichiers[i].file);
+
+        await envoyerDonnees({
+          action: 'upload',
+          jour: jour,
+          date: ITINERAIRE[jour - 1]?.date || '',
+          nomFichier: fichiers[i].file.name,
+          mimeType: fichiers[i].file.type,
+          legende: fichiers[i].legende,
+          base64: base64
+        });
+      }
+    }
+
+    // 2. Enregistrer l'entrée journal
+    progressLabel.textContent = 'Enregistrement du texte...';
+    progressFill.style.width = '90%';
+
+    await envoyerDonnees({
+      action: 'journal',
+      jour: jour,
+      lieu: lieuActuel,
+      titre: titre,
+      texte: texte,
+      nbMedias: fichiers.length
+    });
+
+    progressFill.style.width = '100%';
+
+    // Succès
+    afficherStatut(`✅ J${jour} publié — ${fichiers.length} média${fichiers.length > 1 ? 's' : ''} + texte`, 'ok');
+
+    // Nettoyer
+    fichiers.forEach(f => URL.revokeObjectURL(f.preview));
+    fichiers = [];
+    renderPreviews();
+    try { localStorage.removeItem('cvj_brouillon_' + jour); } catch(e) {}
+
+  } catch(err) {
+    afficherStatut('❌ Erreur : ' + err.message, 'err');
+  } finally {
+    enCours = false;
+    btn.disabled = false;
+    btn.textContent = '🚀 Publier cette journée';
+    setTimeout(() => {
+      progress.classList.remove('visible');
+      progressFill.style.width = '0%';
+    }, 2000);
+  }
+}
+
+// ── Utilitaires ────────────────────────────────────────────────
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error('Lecture du fichier impossible'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// ⚠️ MÉTHODE VALIDÉE — NE PAS CHANGER LE Content-Type
+async function envoyerDonnees(payload) {
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    await new Promise(r => setTimeout(r, 1500));
+  } catch(e) {
+    throw new Error('Envoi échoué : ' + e.message);
+  }
+}
+
+function afficherStatut(msg, type) {
+  const bar = document.getElementById('statusBar');
+  bar.textContent = msg;
+  bar.className = 'status-bar visible ' + type;
+  setTimeout(() => bar.classList.remove('visible'), 4000);
+}
+</script>
+
+</body>
+</html>
