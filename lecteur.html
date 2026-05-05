@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cap-Vert Journal — Voyage de Phil & Flo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean: #0b3d5c;
+    --ocean-mid: #14698a;
+    --ocean-light: #a3d5e6;
+    --sand: #f4e8d0;
+    --sand-light: #faf5eb;
+    --terra: #c45a2d;
+    --terra-soft: #e8956a;
+    --green: #2d7a5a;
+    --green-soft: #8bc4a8;
+    --lava: #3a3535;
+    --white: #fefcf7;
+    --text: #2a2320;
+    --text-soft: #7a7068;
+    --text-faint: #b5aa9e;
+    --shadow-sm: 0 2px 12px rgba(11, 61, 92, 0.08);
+    --shadow-md: 0 8px 32px rgba(11, 61, 92, 0.12);
+    --shadow-lg: 0 16px 48px rgba(11, 61, 92, 0.16);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    background: var(--sand-light);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(44, 122, 90, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(196, 90, 45, 0.1) 0%, transparent 50%),
+      linear-gradient(175deg, var(--ocean) 0%, var(--ocean-mid) 40%, var(--ocean-light) 75%, var(--sand) 100%);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0 Q35 15 30 30 Q25 15 30 0z' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 700px; }
+  .hero-emoji {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .hero .tagline {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--ocean-light);
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .hero .dates {
+    display: inline-block;
+    padding: 10px 28px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 40px;
+    color: var(--sand);
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,0.06);
+  }
+  .hero .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.4);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  /* ── NAV JOURS ── */
+  .nav-jours {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(254, 252, 247, 0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(11, 61, 92, 0.08);
+    padding: 12px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-jours::-webkit-scrollbar { display: none; }
+  .nav-jours-inner {
+    display: flex;
+    gap: 6px;
+    padding: 0 20px;
+    min-width: max-content;
+  }
+  .nav-jour-btn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 24px;
+    background: transparent;
+    color: var(--text-soft);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+  .nav-jour-btn:hover { background: var(--sand); color: var(--text); }
+  .nav-jour-btn.active {
+    background: var(--ocean);
+    color: white;
+    font-weight: 500;
+  }
+  .nav-jour-btn.empty {
+    color: var(--text-faint);
+    cursor: default;
+  }
+  .nav-jour-btn .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--terra);
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+
+  /* ── CARTE SECTION ── */
+  .carte-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 24px 32px;
+  }
+  .carte-titre {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--ocean);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .carte-container {
+    width: 100%;
+    height: 380px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background: var(--ocean-light);
+  }
+  .carte-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  .timeline-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--ocean);
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  /* ── CARTE JOUR ── */
+  .jour-card {
+    position: relative;
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .jour-card::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 60px;
+    bottom: -48px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--ocean-light), transparent);
+  }
+  .jour-card:last-child::before { display: none; }
+
+  .jour-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .jour-badge {
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ocean), var(--ocean-mid));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 16px rgba(11, 61, 92, 0.3);
+    position: relative;
+    z-index: 2;
+  }
+  .jour-meta {
+    padding-top: 4px;
+  }
+  .jour-date {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .jour-lieu {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+
+  .jour-body {
+    margin-left: 66px;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+  }
+  .jour-body:hover { box-shadow: var(--shadow-md); }
+
+  .jour-titre {
+    padding: 20px 24px 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--terra);
+    line-height: 1.3;
+  }
+  .jour-texte {
+    padding: 12px 24px 20px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  /* ── GALERIE ── */
+  .galerie {
+    padding: 0 12px 16px;
+  }
+  .galerie-grid {
+    display: grid;
+    gap: 6px;
+  }
+  .galerie-grid.count-1 { grid-template-columns: 1fr; }
+  .galerie-grid.count-2 { grid-template-columns: 1fr 1fr; }
+  .galerie-grid.count-3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+  .galerie-grid.count-3 .galerie-item:first-child { grid-row: 1 / 3; }
+  .galerie-grid.count-many { grid-template-columns: repeat(3, 1fr); }
+
+  .galerie-item {
+    position: relative;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 4/3;
+    background: var(--sand);
+  }
+  .galerie-grid.count-1 .galerie-item { aspect-ratio: 16/9; }
+  .galerie-item img, .galerie-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .galerie-item:hover img, .galerie-item:hover video {
+    transform: scale(1.05);
+  }
+  .galerie-item .legende-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px 12px 8px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.55));
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 400;
+  }
+  .galerie-item .play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .galerie-item .play-icon::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 20px solid white;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    margin-left: 4px;
+  }
+  .galerie-more {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 61, 92, 0.6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    backdrop-filter: blur(2px);
+  }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    backdrop-filter: blur(8px);
+  }
+  .lightbox.visible { display: flex; }
+  .lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: rgba(255,255,255,0.12);
+    color: white;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,0.25); }
+  .lightbox-media {
+    max-width: 90vw;
+    max-height: 80vh;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+  }
+  .lightbox-legende {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.95rem;
+    margin-top: 16px;
+    text-align: center;
+    max-width: 600px;
+    padding: 0 24px;
+  }
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 1.4rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .lightbox-nav:hover { background: rgba(255,255,255,0.25); }
+  .lightbox-nav.prev { left: 16px; }
+  .lightbox-nav.next { right: 16px; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-soft);
+  }
+  .empty-state .emoji { font-size: 3rem; margin-bottom: 16px; }
+  .empty-state p { font-size: 1.1rem; max-width: 400px; margin: 0 auto; }
+
+  /* ── LOADING ── */
+  .loading {
+    text-align: center;
+    padding: 80px 24px;
+  }
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--sand);
+    border-top-color: var(--ocean);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { color: var(--text-soft); font-size: 0.95rem; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-faint);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .hero { min-height: 70vh; padding: 48px 20px; }
+    .jour-body { margin-left: 0; margin-top: 12px; }
+    .jour-card::before { display: none; }
+    .jour-header { gap: 12px; }
+    .jour-badge { width: 42px; height: 42px; font-size: 0.78rem; }
+    .jour-lieu { font-size: 1.25rem; }
+    .jour-titre { font-size: 1.15rem; padding: 16px 18px 0; }
+    .jour-texte { padding: 10px 18px 16px; font-size: 0.95rem; }
+    .galerie { padding: 0 8px 12px; }
+    .galerie-grid.count-3 { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+    .galerie-grid.count-3 .galerie-item:first-child { grid-row: auto; }
+    .galerie-grid.count-many { grid-template-columns: 1fr 1fr; }
+    .carte-container { height: 280px; }
+    .lightbox-nav { width: 40px; height: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-emoji">🏝️</div>
+    <h1>Cap-Vert Journal</h1>
+    <div class="tagline">Carnet de voyage de Phil & Flo</div>
+    <div class="dates">7 — 26 mai 2026 · Santiago · São Vicente · Santo Antão</div>
+  </div>
+  <div class="scroll-hint">↓ Découvrir le voyage</div>
+</section>
+
+<!-- NAV JOURS -->
+<nav class="nav-jours" id="navJours">
+  <div class="nav-jours-inner" id="navJoursInner"></div>
+</nav>
+
+<!-- CARTE -->
+<section class="carte-section" id="carteSection">
+  <div class="carte-titre">📍 Notre parcours</div>
+  <div class="carte-container" id="carteContainer"></div>
+</section>
+
+<!-- TIMELINE -->
+<section class="timeline" id="timeline">
+  <div class="timeline-section-title">📖 Le journal du voyage</div>
+  <div id="timelineContent">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Chargement du journal…</p>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="fermerLightbox()">✕</button>
+  <button class="lightbox-nav prev" onclick="navLightbox(-1)">‹</button>
+  <button class="lightbox-nav next" onclick="navLightbox(1)">›</button>
+  <img class="lightbox-media" id="lightboxMedia" src="" alt="">
+  <div class="lightbox-legende" id="lightboxLegende"></div>
+</div>
+
+<footer class="footer">Cap-Vert Journal · GUILLEVIC · 2026</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ⚠️ REMPLACER PAR VOTRE URL APPS SCRIPT /exec
+// ═══════════════════════════════════════════════════════════════
+const WEBHOOK_URL = "COLLER_VOTRE_URL_APPS_SCRIPT_ICI";
+
+// ── Données ────────────────────────────────────────────────────
+const JOURS_LABELS = [
+  { jour: 1,  date: "7 mai",  ile: "Santiago" },
+  { jour: 2,  date: "8 mai",  ile: "Santiago" },
+  { jour: 3,  date: "9 mai",  ile: "Santiago" },
+  { jour: 4,  date: "10 mai", ile: "Santiago" },
+  { jour: 5,  date: "11 mai", ile: "Santiago" },
+  { jour: 6,  date: "12 mai", ile: "Santiago" },
+  { jour: 7,  date: "13 mai", ile: "Santiago" },
+  { jour: 8,  date: "14 mai", ile: "Santiago" },
+  { jour: 9,  date: "15 mai", ile: "São Vicente" },
+  { jour: 10, date: "16 mai", ile: "São Vicente" },
+  { jour: 11, date: "17 mai", ile: "São Vicente" },
+  { jour: 12, date: "18 mai", ile: "Santo Antão" },
+  { jour: 13, date: "19 mai", ile: "Santo Antão" },
+  { jour: 14, date: "20 mai", ile: "Santo Antão" },
+  { jour: 15, date: "21 mai", ile: "Santo Antão" },
+  { jour: 16, date: "22 mai", ile: "Santo Antão" },
+  { jour: 17, date: "23 mai", ile: "São Vicente" },
+  { jour: 18, date: "24 mai", ile: "São Vicente" },
+  { jour: 19, date: "25 mai", ile: "São Vicente" },
+  { jour: 20, date: "26 mai", ile: "Vol retour" }
+];
+
+// Coordonnées des lieux pour la carte
+const COORDS = {
+  "Praia":          { lat: 14.9195, lng: -23.5087 },
+  "Cidade Velha":   { lat: 14.9167, lng: -23.6044 },
+  "Tarrafal":       { lat: 15.2783, lng: -23.7519 },
+  "Assomada":       { lat: 15.0953, lng: -23.6644 },
+  "Mindelo":        { lat: 16.8901, lng: -24.9808 },
+  "Porto Novo":     { lat: 17.0202, lng: -25.0654 },
+  "Ribeira Grande": { lat: 17.1811, lng: -25.0650 },
+  "Ponta do Sol":   { lat: 17.2025, lng: -25.0919 },
+  "Corvo":          { lat: 17.1800, lng: -25.1100 },
+  "Paul":           { lat: 17.1300, lng: -25.0200 },
+  "Calhau":         { lat: 16.8567, lng: -24.8917 },
+  "Baía das Gatas": { lat: 16.9000, lng: -24.9200 },
+  "São Pedro":      { lat: 16.8333, lng: -25.0500 }
+};
+
+let journalData = { journal: [], medias: [] };
+let lightboxItems = [];
+let lightboxIndex = 0;
+
+// ── Chargement ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildNavJours([]);
+  chargerJournal();
+});
+
+async function chargerJournal() {
+  try {
+    const resp = await fetch(WEBHOOK_URL + '?action=lire');
+    journalData = await resp.json();
+
+    if (journalData.status === 'ok') {
+      const joursPublies = journalData.journal.map(j => j.jour);
+      buildNavJours(joursPublies);
+      renderTimeline();
+      renderCarte(joursPublies);
+    } else {
+      throw new Error(journalData.message || 'Erreur');
+    }
+  } catch(err) {
+    document.getElementById('timelineContent').innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">✈️</div>
+        <p>Le voyage n'a pas encore commencé… Revenez bientôt pour suivre l'aventure !</p>
+      </div>
+    `;
+    // Afficher quand même la carte vide
+    renderCarte([]);
+  }
+}
+
+// ── Navigation jours ───────────────────────────────────────────
+function buildNavJours(joursPublies) {
+  const nav = document.getElementById('navJoursInner');
+  nav.innerHTML = '';
+
+  // Bouton "Tout"
+  const btnAll = document.createElement('button');
+  btnAll.className = 'nav-jour-btn active';
+  btnAll.textContent = 'Tout';
+  btnAll.onclick = () => {
+    document.querySelectorAll('.nav-jour-btn').forEach(b => b.classList.remove('active'));
+    btnAll.classList.add('active');
+    document.querySelectorAll('.jour-card').forEach(c => c.style.display = '');
+  };
+  nav.appendChild(btnAll);
+
+  JOURS_LABELS.forEach(j => {
+    const btn = document.createElement('button');
+    const hasContent = joursPublies.includes(j.jour);
+    btn.className = 'nav-jour-btn' + (hasContent ? '' : ' empty');
+    btn.innerHTML = `J${j.jour}` + (hasContent ? '<span class="dot"></span>' : '');
+    if (hasContent) {
+      btn.onclick = () => {
+        document.querySelectorAll('.nav-jour-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.jour-card').forEach(c => {
+          c.style.display = parseInt(c.dataset.jour) === j.jour ? '' : 'none';
+        });
+        const target = document.querySelector(`.jour-card[data-jour="${j.jour}"]`);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+    }
+    nav.appendChild(btn);
+  });
+}
+
+// ── Rendu Timeline ─────────────────────────────────────────────
+function renderTimeline() {
+  const container = document.getElementById('timelineContent');
+
+  if (!journalData.journal || journalData.journal.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">✈️</div>
+        <p>Le voyage n'a pas encore commencé… Revenez bientôt pour suivre l'aventure !</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Trier par jour décroissant (le plus récent en premier)
+  const entries = [...journalData.journal].sort((a, b) => b.jour - a.jour);
+
+  container.innerHTML = '';
+  entries.forEach((entry, idx) => {
+    const jourLabel = JOURS_LABELS.find(j => j.jour === entry.jour) || {};
+    const mediasJour = (journalData.medias || []).filter(m => m.jour === entry.jour);
+
+    const card = document.createElement('div');
+    card.className = 'jour-card';
+    card.dataset.jour = entry.jour;
+    card.style.animationDelay = (idx * 0.1) + 's';
+
+    let galerieHTML = '';
+    if (mediasJour.length > 0) {
+      const countClass = mediasJour.length === 1 ? 'count-1' :
+                         mediasJour.length === 2 ? 'count-2' :
+                         mediasJour.length === 3 ? 'count-3' : 'count-many';
+      const visibleMedias = mediasJour.slice(0, 6);
+      const remaining = mediasJour.length - 6;
+
+      galerieHTML = `<div class="galerie"><div class="galerie-grid ${countClass}">`;
+      visibleMedias.forEach((m, mi) => {
+        const isVideo = m.type && m.type.startsWith('video');
+        const thumbUrl = m.urlDrive ? getThumbnailUrl(m.urlDrive) : '';
+        const legende = m.legende ? `<div class="legende-overlay">${escapeHtml(m.legende)}</div>` : '';
+        const playIcon = isVideo ? '<div class="play-icon"></div>' : '';
+        const moreOverlay = (mi === 5 && remaining > 0) ? `<div class="galerie-more">+${remaining}</div>` : '';
+
+        galerieHTML += `
+          <div class="galerie-item" onclick="ouvrirLightbox(${entry.jour}, ${mi})">
+            <img src="${thumbUrl}" alt="${escapeHtml(m.legende || m.nomFichier || '')}" loading="lazy">
+            ${playIcon}${legende}${moreOverlay}
+          </div>
+        `;
+      });
+      galerieHTML += `</div></div>`;
+    }
+
+    card.innerHTML = `
+      <div class="jour-header">
+        <div class="jour-badge">J${entry.jour}</div>
+        <div class="jour-meta">
+          <div class="jour-date">${jourLabel.date || ''} · ${jourLabel.ile || ''}</div>
+          <div class="jour-lieu">📍 ${escapeHtml(entry.lieu || jourLabel.ile || '')}</div>
+        </div>
+      </div>
+      <div class="jour-body">
+        ${entry.titre ? `<div class="jour-titre">${escapeHtml(entry.titre)}</div>` : ''}
+        ${entry.texte ? `<div class="jour-texte">${escapeHtml(entry.texte)}</div>` : ''}
+        ${galerieHTML}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// ── Carte ──────────────────────────────────────────────────────
+function renderCarte(joursPublies) {
+  const container = document.getElementById('carteContainer');
+
+  // Construire les marqueurs pour les lieux visités
+  const lieuxVisites = new Set();
+  if (journalData.journal) {
+    journalData.journal.forEach(entry => {
+      if (entry.lieu) {
+        // Trouver la coordonnée la plus proche
+        const lieuKey = Object.keys(COORDS).find(k =>
+          entry.lieu.toLowerCase().includes(k.toLowerCase())
+        );
+        if (lieuKey) lieuxVisites.add(lieuKey);
+      }
+    });
+  }
+
+  // Construire l'URL de la carte OpenStreetMap embarquée
+  // Centre sur le Cap-Vert
+  const centerLat = 15.9;
+  const centerLng = -24.2;
+
+  // Utiliser une iframe OpenStreetMap simple
+  const bbox = `-25.5,14.5,-23.0,17.5`;
+  let markersParam = '';
+  lieuxVisites.forEach(lieu => {
+    const c = COORDS[lieu];
+    if (c) markersParam += `&marker=${c.lat},${c.lng}`;
+  });
+
+  // Carte stylisée via iframe
+  container.innerHTML = `
+    <iframe
+      src="https://www.openstreetmap.org/export/embed.html?bbox=-25.5%2C14.5%2C-23.0%2C17.5&layer=mapnik"
+      loading="lazy"
+      title="Carte du Cap-Vert"
+    ></iframe>
+  `;
+}
+
+// ── Lightbox ───────────────────────────────────────────────────
+function ouvrirLightbox(jour, index) {
+  const mediasJour = (journalData.medias || []).filter(m => m.jour === jour);
+  if (mediasJour.length === 0) return;
+
+  lightboxItems = mediasJour;
+  lightboxIndex = index;
+  afficherLightboxItem();
+
+  document.getElementById('lightbox').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function afficherLightboxItem() {
+  const item = lightboxItems[lightboxIndex];
+  if (!item) return;
+
+  const media = document.getElementById('lightboxMedia');
+  const legende = document.getElementById('lightboxLegende');
+
+  const isVideo = item.type && item.type.startsWith('video');
+
+  if (isVideo && item.urlDrive) {
+    // Pour les vidéos Drive, on affiche le lien
+    media.src = getThumbnailUrl(item.urlDrive);
+    media.alt = item.legende || item.nomFichier || '';
+  } else {
+    media.src = item.urlDrive ? getLargeImageUrl(item.urlDrive) : '';
+    media.alt = item.legende || item.nomFichier || '';
+  }
+
+  legende.textContent = item.legende || '';
+}
+
+function fermerLightbox() {
+  document.getElementById('lightbox').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+function navLightbox(dir) {
+  lightboxIndex = (lightboxIndex + dir + lightboxItems.length) % lightboxItems.length;
+  afficherLightboxItem();
+}
+
+// Clavier
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('lightbox').classList.contains('visible')) return;
+  if (e.key === 'Escape') fermerLightbox();
+  if (e.key === 'ArrowLeft') navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
+
+// Clic en dehors
+document.getElementById('lightbox').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('lightbox')) fermerLightbox();
+});
+
+// ── Utilitaires ────────────────────────────────────────────────
+function getThumbnailUrl(driveUrl) {
+  // Extraire l'ID du fichier Drive
+  const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w600`;
+  }
+  return driveUrl;
+}
+
+function getLargeImageUrl(driveUrl) {
+  const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1200`;
+  }
+  return driveUrl;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>
